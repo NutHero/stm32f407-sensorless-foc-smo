@@ -1,0 +1,35 @@
+# Keil / MDK 构建产物
+Output/
+Objects/
+Listings/
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.elf
+*.map
+*.lst
+*.lnp
+*.dep
+*.iex
+*.sct
+*.build_log.htm
+*.__i
+*.htm
+
+# Keil 用户级设置（每人本地不同，不入库）
+*.uvguix.*
+*.uvoptx
+JLinkLog.txt
+*.scvd
+EventRecorderStub.scvd
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+.workbuddy/
