@@ -5,7 +5,7 @@
 [![MCU](https://img.shields.io/badge/MCU-STM32F407ZETx-03234B)](https://www.st.com/)
 [![IDE](https://img.shields.io/badge/IDE-Keil%20MDK%205-199A37)]()
 [![Compiler](https://img.shields.io/badge/ARMCC-5.06-blue)]()
-[![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ---
 
@@ -171,5 +171,6 @@ VOFA+ JustFloat 协议上传 11 路浮点观测量（估计角 vs 实测角、α
 
 ## 说明
 
+- 本项目采用 **GNU General Public License v3.0 (GPL-3.0)** 开源，详见仓库根目录的 `LICENSE` 文件。Copyright (c) 2026 Blue_Dog。
 - ST HAL 驱动与 CMSIS 遵循各自原始许可（BSD-3-Clause / Apache-2.0）。
 - `Drivers/FOC`、`Drivers/BSP`、`Drivers/App` 下代码为作者原创。

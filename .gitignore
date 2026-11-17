@@ -33,3 +33,10 @@ desktop.ini
 .vscode/
 .idea/
 .workbuddy/
+
+# 本地版本备份与临时文件（不入库）
+*.v[0-9]*
+*.bak
+*.tmp
+*.orig
+.wb_tmp/

@@ -7,7 +7,7 @@
 #include "sincos16.h"
 #include "time.h"
 
-#define BUS_CURRENT_LIMIT   2400    //母线电流限流，单位：mA
+//#define BUS_CURRENT_LIMIT   24000    //母线电流限流，单位：mA
 
 /* 进程状态枚举 */
 typedef enum{
@@ -32,6 +32,17 @@ typedef struct
 }sys_sta_;
 
 extern sys_sta_ sys_sta;
+
+/* 功率板模拟量结构体：母线电流 / 母线电压 / 功率板温度 */
+typedef struct
+{
+	float bus_current;	//母线电流，单位：mA   
+	float bus_voltage;	//母线电压，单位：V
+	float temperature;	//功率板温度，单位：摄氏度
+}power_board_;
+
+extern power_board_ power_board;	//功率板模拟量, 10ms 周期刷新
+
 
 void sys_process_run(dev_motor * pmotor); //运行任务管理
 void task_scheduler_start(void); //开启系统任务调度

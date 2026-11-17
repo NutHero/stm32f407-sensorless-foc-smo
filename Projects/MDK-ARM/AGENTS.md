@@ -1,5 +1,5 @@
 # AGENTS.md
-
+注：注释使用中文
 Bare-metal STM32F407ZETx sensorless FOC (sliding-mode observer) motor controller.
 Keil MDK-ARM / uVision project only — **no git, no make/CMake, no CI, no tests**.
 

@@ -1,11 +1,10 @@
 #include "task_process.h"
 #include "decodeVofa+.h"
+#include "adc.h"
 
 sys_sta_ sys_sta;
 
-float bus_i; //母线电流
-float bus_v; //母线电压
-
+power_board_ power_board;	//功率板模拟量: 母线电流/母线电压/温度
 
 /** 
  * @brief 开启系统任务调度 
@@ -47,6 +46,13 @@ void sys_process_run(dev_motor *pmotor)
     sys_sta.tick++;
     if(sys_sta.tick % 10 == 0) //系统任务处理周期，10ms
     {
+        /* 驱动板温度 / 母线电流 / 母线电压: ADC3 普通组: 温度/电压单次转换 + 母线电流 48 次平均(约 115us),
+           被电流环注入组打断时保留上一次的有效值 */
+        adc_regular_update();
+        power_board.bus_current = ADC_GetBusCurrent_mA();
+        power_board.bus_voltage = ADC_GetBusVoltage_V();
+        power_board.temperature = ADC_GetTemperature_C();
+
         switch(sys_sta.current_process)
         {
             case PROC_GET_OFFSET:
@@ -107,6 +113,7 @@ void sys_process_run(dev_motor *pmotor)
             }
             case PROC_WAIT_CMD:
             {
+                int8_t dir_now;
                 __disable_irq();
                 if(pmotor->mode == BLDC_MODE_SPEED_LOOP || pmotor->mode == BLDC_MODE_SPEED_CONTROL) //在速度模式下
                 {                         
@@ -116,11 +123,19 @@ void sys_process_run(dev_motor *pmotor)
                         {
                            sys_sta.current_process = PROC_CLOSE_MOTOR;
                         }    
-                        if(GetMotorDir(pmotor) != pmotor->dir_pre) //电机方向发生改变时清除PID误差可以加快电机正反转
+                        /* 转向改变时清除PID误差可以加快电机正反转。
+                           注意: encoder->dir 是【本次采样周期】的位移方向, 电机静止或采样窗口内
+                           没有脉冲时它就是 0, 不能当成反向; 否则速度环积分会被反复清零,
+                           无感速度环下表现为电压塌陷 -> 掉步 -> 堵转/噪音大 */
+                        dir_now = GetMotorDir(pmotor);
+                        if(dir_now != 0)
                         {
-                            pid_clear_q15(pmotor->_speed_pid);
-                            pid_clear_q15(pmotor->_iq_pid);
-                            pmotor->dir_pre = GetMotorDir(pmotor);
+                            if(pmotor->dir_pre != 0 && dir_now != pmotor->dir_pre)
+                            {
+                                pid_clear_q15(pmotor->_speed_pid);
+                                pid_clear_q15(pmotor->_iq_pid);
+                            }
+                            pmotor->dir_pre = dir_now;
                         }                        
                     }
                 }
@@ -168,16 +183,22 @@ void sys_process_run(dev_motor *pmotor)
             }
             case PROC_GET_BUS_CUR:
             {
+                /* 10ms 周期已刷新, 这里给母线电流再取一次当前值 */
+                power_board.bus_current = ADC_GetBusCurrent_mA();
                 sys_sta.current_process = PROC_WAIT_CMD;
                 break;
             }
 			case PROC_GET_BUS_VOL:
 			{
+				/* 10ms 周期已刷新, 这里给母线电压再取一次当前值 */
+				power_board.bus_voltage = ADC_GetBusVoltage_V();
 				sys_sta.current_process = PROC_WAIT_CMD;
 				break;
 			}
 			case PROC_GET_TEMP:
 			{
+				/* 10ms 周期已刷新, 这里给驱动板温度再取一次当前值 */
+				power_board.temperature = ADC_GetTemperature_C();
 				sys_sta.current_process = PROC_WAIT_CMD;
 				break;
 			}
